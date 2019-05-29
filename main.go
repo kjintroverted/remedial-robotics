@@ -12,22 +12,27 @@ import (
 var botID string
 var commandPrefix string
 var voteDuration time.Duration
+var deleteDuration time.Duration
 
 func main() {
+	// CONNECT TO SERVER
 	session, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	errCheck("could not connect to discord:", err)
-
 	botID, err := session.User("@me")
 	errCheck("ERROR could not get user info", err)
-
 	log("Logged in as", botID)
 
+	// SET SOME VARS
 	commandPrefix = "!"
 	voteDuration = 5 * time.Minute
+	deleteDuration = 24 * time.Hour
 
+	// ADD HANDLERS
 	session.AddHandler(onReady)
 	session.AddHandler(onCommand)
+	session.AddHandler(onHelp)
 
+	// OPEN AND STAY OPEN
 	err = session.Open()
 	errCheck("could not open connection to Discord", err)
 	defer session.Close()
@@ -38,6 +43,19 @@ func main() {
 
 func onReady(session *discordgo.Session, ready *discordgo.Ready) {
 	session.UpdateStatus(0, "Introduction to Basics")
+}
+
+func onHelp(session *discordgo.Session, message *discordgo.MessageCreate) {
+	channel, _ := session.Channel(message.ChannelID)
+	log("Marked for delete:", message.Content)
+	if channel.Name == "help" {
+		go func(session *discordgo.Session, message *discordgo.MessageCreate) {
+			// WAIT
+			time.Sleep(deleteDuration)
+			// DELETE MESSAGE
+			session.ChannelMessageDelete(message.ChannelID, message.ID)
+		}(session, message)
+	}
 }
 
 func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
