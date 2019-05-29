@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -21,9 +20,10 @@ func main() {
 	botID, err := session.User("@me")
 	errCheck("ERROR could not get user info", err)
 
-	fmt.Println("Logged in as", botID)
+	log("Logged in as", botID)
 
 	commandPrefix = "!"
+	voteDuration = 5 * time.Minute
 
 	session.AddHandler(onReady)
 	session.AddHandler(onCommand)
@@ -34,12 +34,6 @@ func main() {
 	defer session.UpdateStatus(1, "")
 
 	<-make(chan struct{})
-}
-
-func errCheck(message string, err error) {
-	if err != nil {
-		fmt.Println("ERROR", message, err)
-	}
 }
 
 func onReady(session *discordgo.Session, ready *discordgo.Ready) {
@@ -59,24 +53,29 @@ func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
 }
 
 func onVote(session *discordgo.Session, message *discordgo.MessageCreate) {
-	fmt.Println("Let's put it to a vote:", message.Content)
-	err := session.MessageReactionAdd(message.ChannelID, message.ID, "👍")
-	errCheck("failed to react", err)
-	err = session.MessageReactionAdd(message.ChannelID, message.ID, "👎")
-	errCheck("failed to react", err)
+	log("Let's put it to a vote:", message.Content)
+
+	session.MessageReactionAdd(message.ChannelID, message.ID, "👍")
+	session.MessageReactionAdd(message.ChannelID, message.ID, "👎")
 	go checkVote(session, message)
 }
 
 func checkVote(session *discordgo.Session, message *discordgo.MessageCreate) {
-	time.Sleep(10 * time.Second)
-	users, err := session.MessageReactions(message.ChannelID, message.ID, "👍", 100)
+	// WAIT FOR VOTES
+	time.Sleep(voteDuration)
+	log("Times up for", message.Content)
+
+	// GET COUNTS
+	users, _ := session.MessageReactions(message.ChannelID, message.ID, "👍", 100)
 	yea := len(users) - 1
-	users, err = session.MessageReactions(message.ChannelID, message.ID, "👎", 100)
+	users, _ = session.MessageReactions(message.ChannelID, message.ID, "👎", 100)
 	ney := len(users) - 1
 	score := strconv.Itoa(yea) + "-" + strconv.Itoa(ney)
 
-	errCheck("getting +1:", err)
+	// GET VOTE CONTEXT
 	text := strings.SplitN(message.Content, " ", 2)[1]
+
+	// CREATE RESULT MESSAGE
 	var result string
 	switch {
 	case yea == 0 && ney == 0:
@@ -91,5 +90,7 @@ func checkVote(session *discordgo.Session, message *discordgo.MessageCreate) {
 	case yea < ney:
 		result = text + " just isn't gonna work"
 	}
+
+	// SEND MESSAGE TO CHANNEL
 	session.ChannelMessageSend(message.ChannelID, "The people have spoken..."+result+" ("+score+")")
 }
