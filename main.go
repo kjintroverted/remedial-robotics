@@ -44,7 +44,7 @@ func onReady(session *discordgo.Session, ready *discordgo.Ready) {
 }
 
 func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
-	if message.Content[0:1] != "!" {
+	if len(message.Content) < 2 || message.Content[0:1] != "!" {
 		return
 	}
 
@@ -56,7 +56,7 @@ func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
 }
 
 func onVote(session *discordgo.Session, message *discordgo.MessageCreate) {
-	fmt.Println("Let's put it to a vote")
+	fmt.Println("Let's put it to a vote:", message.Content)
 	err := session.MessageReactionAdd(message.ChannelID, message.ID, "👍")
 	errCheck("failed to react", err)
 	err = session.MessageReactionAdd(message.ChannelID, message.ID, "👎")
