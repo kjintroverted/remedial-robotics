@@ -12,6 +12,7 @@ import (
 var botID string
 var commandPrefix string
 var voteDuration time.Duration
+var shortVoteDuration time.Duration
 var deleteDuration time.Duration
 
 func main() {
@@ -24,8 +25,10 @@ func main() {
 
 	// SET SOME VARS
 	commandPrefix = "!"
-	voteDuration = 5 * time.Minute
+	voteDuration = 2 * time.Hour
 	log("vote duration:", voteDuration)
+	shortVoteDuration = 5 * time.Minute
+	log("short vote duration:", shortVoteDuration)
 	deleteDuration = 24 * time.Hour
 	log("delete delay:", deleteDuration)
 
@@ -68,21 +71,24 @@ func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
 	command := strings.Split(message.Content, " ")[0][1:]
 	switch command {
 	case "vote":
-		onVote(session, message)
+		onVote(session, message, voteDuration)
+		break
+	case "quick-vote":
+		onVote(session, message, shortVoteDuration)
 	}
 }
 
-func onVote(session *discordgo.Session, message *discordgo.MessageCreate) {
+func onVote(session *discordgo.Session, message *discordgo.MessageCreate, duration time.Duration) {
 	log("Let's put it to a vote:", message.Content)
 
 	session.MessageReactionAdd(message.ChannelID, message.ID, "👍")
 	session.MessageReactionAdd(message.ChannelID, message.ID, "👎")
-	go checkVote(session, message)
+	go checkVote(session, message, duration)
 }
 
-func checkVote(session *discordgo.Session, message *discordgo.MessageCreate) {
+func checkVote(session *discordgo.Session, message *discordgo.MessageCreate, duration time.Duration) {
 	// WAIT FOR VOTES
-	time.Sleep(voteDuration)
+	time.Sleep(duration)
 	log("Times up for", message.Content)
 
 	// GET COUNTS
