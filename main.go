@@ -99,10 +99,10 @@ func checkVote(session *discordgo.Session, message *discordgo.MessageCreate) {
 	var result string
 	switch {
 	case yea == 0 && ney == 0:
-		result = "No one cares"
+		result = "No one cares about " + text
 		break
 	case yea == ney:
-		result = "Its a tie, so idk..."
+		result = "Its a tie for " + text + ", so idk..."
 		break
 	case yea > ney:
 		result = "in favor of " + text
