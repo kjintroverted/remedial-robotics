@@ -16,6 +16,7 @@ var shortVoteDuration time.Duration
 var deleteDuration time.Duration
 
 func main() {
+	log("Running in", os.Getenv("ENV"), "environment")
 	// CONNECT TO SERVER
 	session, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	errCheck("could not connect to discord:", err)
@@ -34,8 +35,8 @@ func main() {
 
 	// ADD HANDLERS
 	session.AddHandler(onReady)
-	session.AddHandler(onCommand)
 	session.AddHandler(onHelp)
+	session.AddHandler(onCommand)
 
 	// OPEN AND STAY OPEN
 	err = session.Open()
@@ -51,6 +52,9 @@ func onReady(session *discordgo.Session, ready *discordgo.Ready) {
 }
 
 func onHelp(session *discordgo.Session, message *discordgo.MessageCreate) {
+	if !channelCheck(session, message) {
+		return
+	}
 	channel, _ := session.Channel(message.ChannelID)
 	if channel.Name == "help" {
 		log("Marked for delete:", message.Content)
@@ -64,6 +68,10 @@ func onHelp(session *discordgo.Session, message *discordgo.MessageCreate) {
 }
 
 func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
+	if !channelCheck(session, message) {
+		return
+	}
+
 	if len(message.Content) < 2 || message.Content[0:1] != commandPrefix {
 		return
 	}
