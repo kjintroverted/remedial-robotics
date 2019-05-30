@@ -25,7 +25,9 @@ func main() {
 	// SET SOME VARS
 	commandPrefix = "!"
 	voteDuration = 5 * time.Minute
+	log("vote duration:", voteDuration)
 	deleteDuration = 24 * time.Hour
+	log("delete delay:", deleteDuration)
 
 	// ADD HANDLERS
 	session.AddHandler(onReady)
@@ -47,8 +49,8 @@ func onReady(session *discordgo.Session, ready *discordgo.Ready) {
 
 func onHelp(session *discordgo.Session, message *discordgo.MessageCreate) {
 	channel, _ := session.Channel(message.ChannelID)
-	log("Marked for delete:", message.Content)
 	if channel.Name == "help" {
+		log("Marked for delete:", message.Content)
 		go func(session *discordgo.Session, message *discordgo.MessageCreate) {
 			// WAIT
 			time.Sleep(deleteDuration)
