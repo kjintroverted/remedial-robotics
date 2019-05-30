@@ -24,7 +24,7 @@ func main() {
 	log("Logged in as", botID)
 
 	// SET SOME VARS
-	commandPrefix = "!"
+	commandPrefix = "-"
 	voteDuration = 2 * time.Hour
 	log("vote duration:", voteDuration)
 	shortVoteDuration = 5 * time.Minute
@@ -64,7 +64,7 @@ func onHelp(session *discordgo.Session, message *discordgo.MessageCreate) {
 }
 
 func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
-	if len(message.Content) < 2 || message.Content[0:1] != "!" {
+	if len(message.Content) < 2 || message.Content[0:1] != commandPrefix {
 		return
 	}
 
@@ -75,6 +75,9 @@ func onCommand(session *discordgo.Session, message *discordgo.MessageCreate) {
 		break
 	case "quick-vote":
 		onVote(session, message, shortVoteDuration)
+		break
+	default:
+		return
 	}
 }
 
