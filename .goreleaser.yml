@@ -8,6 +8,7 @@ before:
     - go generate ./...
 builds:
 - 
+  binary: professor
   env:
     - CGO_ENABLED=0
   goos:
