@@ -21,6 +21,10 @@ func log(messages ...interface{}) {
 // ELSE ONLY HACK WILL BE USED
 func channelCheck(session *discordgo.Session, message *discordgo.MessageCreate) bool {
 	channel, _ := session.Channel(message.ChannelID)
+	if channel == nil {
+		fmt.Fscanln("Could not fund channel for message: " + message.Content)
+		return false
+	}
 	switch os.Getenv("ENV") {
 	case "PROD":
 		if channel.Name == "hack" {
