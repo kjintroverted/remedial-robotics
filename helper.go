@@ -22,7 +22,8 @@ func log(messages ...interface{}) {
 func channelCheck(session *discordgo.Session, message *discordgo.MessageCreate) bool {
 	channel, _ := session.Channel(message.ChannelID)
 	if channel == nil {
-		fmt.Fscanln("Could not fund channel for message: " + message.Content)
+		fmt.Println("ERROR Could not find channel for message: " + message.Content)
+		fmt.Println("\tChannel id: " + message.ChannelID)
 		return false
 	}
 	switch os.Getenv("ENV") {
