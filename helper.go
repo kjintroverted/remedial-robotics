@@ -28,12 +28,12 @@ func channelCheck(session *discordgo.Session, message *discordgo.MessageCreate) 
 	}
 	switch os.Getenv("ENV") {
 	case "PROD":
-		if channel.Name == "hack" {
+		if channel.Name == os.Getenv("DEV_CHANNEL") {
 			return false
 		}
 		return true
 	default:
-		if channel.Name != "hack" {
+		if channel.Name != os.Getenv("DEV_CHANNEL") {
 			return false
 		}
 		return true

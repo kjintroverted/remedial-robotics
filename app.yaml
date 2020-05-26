@@ -1,2 +1,5 @@
 runtime: go112
 env: standard
+env_variables:
+  ENV: "PROD"
+  DEV_CHANNEL: "stackoverflow"
