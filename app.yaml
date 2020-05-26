@@ -1,5 +1,7 @@
 runtime: go112
-env: standard
+
+service: remedial-robotics
+
 env_variables:
   ENV: "TEST"
   DEV_CHANNEL: "stackoverflow"
